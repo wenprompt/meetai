@@ -5,8 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { OctagonAlertIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,10 +36,9 @@ const formSchema = z
   });
 
 export const SignUpView = () => {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,10 +58,32 @@ export const SignUpView = () => {
         name: data.name,
         email: data.email,
         password: data.password,
+        callbackURL: "/", //redirect to home page after sign up
       },
       {
         onSuccess: () => {
-          router.push(`/`);
+          setPending(false);
+          router.push("/");
+        },
+        onError: ({ error }) => {
+          setError(error.message);
+          setPending(false);
+        },
+      }
+    );
+  };
+
+  const onSocial = (provider: "github" | "google") => {
+    setError(null);
+    setPending(true);
+
+    authClient.signIn.social(
+      {
+        provider: provider,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
           setPending(false);
         },
         onError: ({ error }) => {
@@ -182,7 +204,9 @@ export const SignUpView = () => {
                     type="button"
                     disabled={pending}
                     className="w-full"
+                    onClick={() => onSocial("github")}
                   >
+                    <FaGithub />
                     Github
                   </Button>
                   <Button
@@ -190,13 +214,18 @@ export const SignUpView = () => {
                     type="button"
                     disabled={pending}
                     className="w-full"
+                    onClick={() => onSocial("google")}
                   >
+                    <FaGoogle />
                     Google
                   </Button>
                 </div>
                 <div className="text-center text-sm">
                   Already have an account?{" "}
-                  <Link href="/sign-in" className=" underline-offset-4">
+                  <Link
+                    href="/sign-in"
+                    className="underline underline-offset-4"
+                  >
                     Sign in
                   </Link>
                 </div>
