@@ -16,7 +16,7 @@ export const DashboardUserButton = () => {
   const { data, isPending } = authClient.useSession();
   const router = useRouter();
 
-  const onLogoout = async () => {
+  const onLogout = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -65,7 +65,7 @@ export const DashboardUserButton = () => {
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer flex items-center justify-between"
-          onClick={onLogoout}
+          onClick={onLogout}
         >
           Logout
           <LogOutIcon className="size-4" />
