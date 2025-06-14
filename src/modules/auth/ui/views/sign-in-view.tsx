@@ -49,12 +49,12 @@ export const SignInView = () => {
       {
         email: data.email,
         password: data.password,
-        callbackURL: "/",
+        callbackURL: "/", //redirect to home page after sign up after email verification
       },
       {
         onSuccess: () => {
           setPending(false);
-          router.push("/");
+          router.push("/"); //redirect is needed bcos callback isnt called here
         },
         onError: ({ error }) => {
           setError(error.message);
@@ -71,7 +71,7 @@ export const SignInView = () => {
     authClient.signIn.social(
       {
         provider: provider,
-        callbackURL: "/",
+        callbackURL: "/", //redirect to home page after sign up after social login (losses state)
       },
       {
         onSuccess: () => {
@@ -186,7 +186,7 @@ export const SignInView = () => {
             </form>
           </Form>
 
-          <div className="bg-radial from-green-700 to-green-900 relative hidden md:flex flex-col gap-y-4 items-center justify-center">
+          <div className="bg-radial from-sidebar-accent to-sidebar relative hidden md:flex flex-col gap-y-4 items-center justify-center">
             <img src="/logo.svg" alt="Image" className="h-[92px] w-[92px]" />
             <p className="text-2xl font-semibold text-white">Meet.AI </p>
           </div>
