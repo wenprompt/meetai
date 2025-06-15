@@ -4,7 +4,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -12,7 +11,6 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
-  DrawerFooter,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
