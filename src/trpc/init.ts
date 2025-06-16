@@ -23,6 +23,7 @@ const t = initTRPC.create({
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure; //base procedure is a procedure that is not protected by auth
+//middleware to protect the procedure, error if session not found else next to call the procedure itself e.g. mutation
 export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   const session = await auth.api.getSession({
     headers: await headers(),
