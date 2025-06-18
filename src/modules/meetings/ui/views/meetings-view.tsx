@@ -6,12 +6,10 @@ import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 
 export const MeetingsView = () => {
-  console.log("Hllo");
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(trpc.meetings.getMany.queryOptions({}));
 
-  console.log(data, "am i even logging anything");
-  return <div>{JSON.stringify(data)}</div>;
+  return <div className="overflow-x-scroll">{JSON.stringify(data)}</div>;
 };
 
 export const MeetingsViewLoading = () => {
