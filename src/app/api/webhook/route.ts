@@ -71,9 +71,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
     }
     // prevent call.session_started from being called multiple times
-    if (existingMeeting.status === "active") {
-      return NextResponse.json({ status: "200 ok" });
-    }
     await db
       .update(meetings)
       .set({ status: "active", startedAt: new Date() })
