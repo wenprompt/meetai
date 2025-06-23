@@ -11,6 +11,7 @@ import {
 import { db } from "@/db";
 import { agents, meetings } from "@/db/schema";
 import { streamVideo } from "@/lib/stream-video";
+import { inngest } from "@/inngest/client";
 
 //method to verify signature to whoever accessing webhook. not protected by auth but by the signature
 function verifySignatureWithSDK(body: string, signature: string): boolean {
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
     //else if as fallsafe to prevent agent being left in the call for too long and use up tokens
   } else if (eventType === "call.session_participant_left") {
     const event = payload as CallSessionParticipantLeftEvent;
+    //session participant left event we have call_cid which is the call id but no custom field
     const meetingId = event.call_cid.split(":")[1];
 
     if (!meetingId) {
@@ -109,6 +111,57 @@ export async function POST(req: NextRequest) {
 
     const call = streamVideo.video.call("default", meetingId);
     await call.end();
+  } else if (eventType === "call.session_ended") {
+    const event = payload as CallEndedEvent;
+    //call event we have custom field
+    const meetingId = event.call.custom?.meetingId;
+
+    if (!meetingId) {
+      return NextResponse.json(
+        { error: "Missing meeting id" },
+        { status: 400 }
+      );
+    }
+
+    await db
+      .update(meetings)
+      .set({ status: "processing", endedAt: new Date() })
+      .where(and(eq(meetings.id, meetingId), eq(meetings.status, "active")));
+  } else if (eventType === "call.transcription_ready") {
+    const event = payload as CallTranscriptionReadyEvent;
+    const meetingId = event.call_cid.split(":")[1];
+
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set({
+        //auto-on is the default mode in procedures
+        transcriptUrl: event.call_transcription.url,
+      })
+      .where(and(eq(meetings.id, meetingId)))
+      //return the array of the updated meeting
+      .returning();
+
+    if (!updatedMeeting) {
+      return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
+    }
+    await inngest.send({
+      name: "meetings/processing",
+      data: {
+        meetingId: updatedMeeting.id,
+        transcriptUrl: updatedMeeting.transcriptUrl,
+      },
+    });
+  } else if (eventType === "call.recording_ready") {
+    const event = payload as CallRecordingReadyEvent;
+    const meetingId = event.call_cid.split(":")[1];
+
+    await db
+      .update(meetings)
+      .set({
+        //auto-on is the default mode in procedures
+        recordingUrl: event.call_recording.url,
+      })
+      .where(and(eq(meetings.id, meetingId)));
   }
 
   return NextResponse.json({ status: "200 ok" });
