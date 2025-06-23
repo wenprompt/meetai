@@ -40,6 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
+# inngest background jobs
 .inngest/
 .inngest/main.db
