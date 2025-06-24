@@ -12,6 +12,9 @@ yarn dev
 pnpm dev
 # or
 bun dev
+
+# for inngest at localhost:8288
+npx inngest-cli@latest dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
